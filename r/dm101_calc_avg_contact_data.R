@@ -14,9 +14,6 @@ library(ggpubr)
 library(RColorBrewer)
 library(tsibble)
 
-
-setwd("C:/Users/kw/documents/comix_stringency")
-
 # Source user written scripts ---------------------------------------------
 
 ## Only works for the subset in this script will need adapting to do more

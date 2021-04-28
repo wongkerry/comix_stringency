@@ -76,7 +76,7 @@ multi_country <- ggplot() +
         legend.text = element_text(size=15), legend.title = element_text(size=15),
         legend.background = element_rect(fill=NA), legend.direction = "horizontal")
 
-ggplot() +
+multi_country_from_dec <- ggplot() +
   geom_line(data = dts[setting=="weighted"], aes(x = mid_date, y = mean, 
                                                  group = interaction(toupper(area), panel), col = toupper(area)), size=1.5) +
   geom_vline(xintercept=as.numeric(string$Date[yday(string$Date)==1]), colour="grey60") +
@@ -101,31 +101,6 @@ ggplot() +
         legend.background = element_rect(fill=NA), legend.direction = "horizontal")
 
 
-
-ggplot() +
-  geom_step(data=string, aes(x = Date, y = StringencyIndex/17), size=1, col="red") +
-  geom_line(data = dts[setting=="weighted"], aes(x = mid_date, y = mean, group=panel), size=1, col="black") +
-  geom_ribbon(data = dts[setting=="weighted"], aes(x = mid_date, ymin=uci, ymax = lci, group=panel), 
-              fill="black", alpha=0.3) +
-  geom_vline(xintercept=as.numeric(string$Date[yday(string$Date)==1]), colour="grey60") +
-  facet_wrap(.~toupper(area), nrow=4) +
-  scale_x_date(breaks = "month", labels = date_format("%b"), name = "") +
-  scale_y_continuous(expand=c(0,0),name = "Mean contacts", limits = c(0,7), breaks = seq(0,7,1),
-                     sec.axis = sec_axis(~.*17, name = "OxCGRT Stringency Index", breaks = seq(0,100,20))) +
-  annotate("text", x = as.Date("2020-04-03"), y = 6.5, size=5, label = "2020") +
-  annotate("text", x = as.Date("2021-01-25"), y = 6.5, size=5, label = "2021") +
-  theme_bw() +
-  theme(panel.border = element_blank(), panel.grid.major = element_blank(),
-        panel.grid.minor = element_blank(), axis.line = element_line(colour = "black"),
-        axis.text.y.right = element_text(size=15, face="bold", color = 'red'),
-        axis.title.y.right = element_text(size=15, face="bold", color = 'red'),
-        axis.text.y.left = element_text(size=15, face="bold", color = 'black'),
-        axis.title.y.left = element_text(size=15, face="bold", color = 'black'),
-        axis.text.x = element_text(size=10),
-        strip.text.x = element_text(size = 20)) 
-
-
-
 study_dates <- as.Date(c(
   "2020-03-31",
   "2020-06-03",
@@ -138,10 +113,7 @@ study_dates <- as.Date(c(
 ))
 
 
-colors <- colorRampPalette(c("blue", "yellow", "red"))(13)
-
-
-ggplot() +
+uk_contacts_stringency <- ggplot() +
   geom_ribbon(data = dts[area=="uk" & setting=="weighted"], 
               aes(x = mid_date, ymin = uci, ymax = lci), alpha=0.1, fill="black") +
   geom_line(data = dts[area=="uk" & setting=="weighted"], aes(x = mid_date, y = mean), size=1.2,
@@ -171,16 +143,39 @@ ggplot() +
         legend.background = element_rect(fill=NA)) 
 
 
+multi_contacts_stringency <- ggplot() +
+  geom_step(data=string, aes(x = Date, y = StringencyIndex/17), size=1, col="red") +
+  geom_line(data = dts[setting=="weighted"], aes(x = mid_date, y = mean, group=panel), size=1, col="black") +
+  geom_ribbon(data = dts[setting=="weighted"], aes(x = mid_date, ymin=uci, ymax = lci, group=panel), 
+              fill="black", alpha=0.3) +
+  geom_vline(xintercept=as.numeric(string$Date[yday(string$Date)==1]), colour="grey60") +
+  facet_wrap(.~toupper(area), nrow=4) +
+  scale_x_date(breaks = "month", labels = date_format("%b"), name = "") +
+  scale_y_continuous(expand=c(0,0),name = "Mean contacts", limits = c(0,7.5), breaks = seq(0,7,1),
+                     sec.axis = sec_axis(~.*17, name = "OxCGRT Stringency Index", breaks = seq(0,100,20))) +
+  annotate("text", x = as.Date("2020-04-03"), y = 6.5, size=5, label = "2020") +
+  annotate("text", x = as.Date("2021-01-25"), y = 6.5, size=5, label = "2021") +
+  theme_bw() +
+  theme(panel.border = element_blank(), panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(), axis.line = element_line(colour = "black"),
+        axis.text.y.right = element_text(size=15, face="bold", color = 'red'),
+        axis.title.y.right = element_text(size=15, face="bold", color = 'red'),
+        axis.text.y.left = element_text(size=15, face="bold", color = 'black'),
+        axis.title.y.left = element_text(size=15, face="bold", color = 'black'),
+        axis.text.x = element_text(size=10),
+        strip.text.x = element_text(size = 20)) 
+
+
+
 string_merge <- as.data.table(merge(string, dts, by.x = c("area", "Date"),
                                     by.y = c("area", "mid_date")))
 string_merge[, CountryName := toupper(area)]
 string_merge[, month := yearmonth(Date)]
 
-
-ggplot(data = string_merge[setting=="weighted"], aes(x=StringencyIndex, y=mean)) +
+contacts_stringency_scatter <- ggplot(data = string_merge[setting=="weighted"], aes(x=StringencyIndex, y=mean)) +
   geom_point(size=7.5, alpha=0.5, aes(col=CountryName)) +
   scale_color_manual(values =cols, name = c("Country \n Code")) +
-  scale_y_continuous(expand=c(0,0), name = "Mean contacts", limits=c(0,6), breaks=seq(0,6,1)) +
+  scale_y_continuous(expand=c(0,0), name = "Mean contacts", limits=c(0,6), breaks=seq(0,7,1)) +
   scale_x_continuous(expand=c(0,0), name = "OxCGRF Stringency Index", limits = c(0,100)) +
   theme_bw() +
   theme(panel.border = element_blank(), panel.grid.major = element_blank(),
@@ -194,7 +189,7 @@ ggplot(data = string_merge[setting=="weighted"], aes(x=StringencyIndex, y=mean))
         legend.text = element_text(size=15), legend.title = element_text(size=15),
         legend.background = element_rect(fill=NA), legend.direction = "horizontal")
 
-ggplot(data = string_merge[setting=="weighted"], aes(x=StringencyIndex, y=mean)) +
+contacts_stringency_facet <- ggplot(data = string_merge[setting=="weighted"], aes(x=StringencyIndex, y=mean)) +
   geom_point(size=7.5, alpha=0.5, aes(col=CountryName)) +
   scale_color_manual(values =cols) +
   facet_wrap(.~CountryName, nrow=4) +
@@ -211,19 +206,19 @@ ggplot(data = string_merge[setting=="weighted"], aes(x=StringencyIndex, y=mean))
         strip.text.x = element_text(size = 20),
         legend.position = "none")
 
-library(tsibble)
-colors <- colorRampPalette(c("blue", "yellow", "red"))(13)
-
-ggplot(data = string_merge[CountryName=="UK" & setting == "weighted"], aes(x=StringencyIndex, y=mean)) +
-  geom_point(size=7.5, alpha=0.3, aes(col=as.factor(month))) +
-  scale_color_manual(values=setNames(colors, levels(as.factor((string_merge$month))))) +
-  geom_text(aes(label = month), size=5) +
-  scale_y_continuous(breaks=seq(0,6,1), name = "Mean contacts") +
-  scale_x_continuous(name = "OxCGRF Stringency Index") +
-  theme_bw() +
-  theme(panel.border = element_blank(), panel.grid.major = element_blank(),
-        panel.grid.minor = element_blank(), axis.line = element_line(colour = "black"),
-        axis.text = element_text(size=15), 
-        axis.title = element_text(size=20))
+# library(tsibble)
+# colors <- colorRampPalette(c("blue", "yellow", "red"))(13)
+# 
+# ggplot(data = string_merge[CountryName=="UK" & setting == "weighted"], aes(x=StringencyIndex, y=mean)) +
+#   geom_point(size=7.5, alpha=0.3, aes(col=as.factor(month))) +
+#   scale_color_manual(values=setNames(colors, levels(as.factor((string_merge$month))))) +
+#   geom_text(aes(label = month), size=5) +
+#   scale_y_continuous(breaks=seq(0,6,1), name = "Mean contacts") +
+#   scale_x_continuous(name = "OxCGRF Stringency Index") +
+#   theme_bw() +
+#   theme(panel.border = element_blank(), panel.grid.major = element_blank(),
+#         panel.grid.minor = element_blank(), axis.line = element_line(colour = "black"),
+#         axis.text = element_text(size=15), 
+#         axis.title = element_text(size=20))
 
 
